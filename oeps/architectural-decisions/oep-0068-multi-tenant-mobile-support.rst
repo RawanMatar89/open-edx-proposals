@@ -16,7 +16,7 @@ OEP-68: Multi-Tenant Support in Open edX Mobile Apps
        * Ivan Stepanok <ivan.stepanok@raccoongang.com>
 
    * - Arbiter
-     - TBD
+     - Marco Morales
    * - Status
      - Draft
    * - Type
