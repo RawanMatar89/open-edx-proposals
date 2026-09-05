@@ -24,7 +24,7 @@ OEP-68: Multi-Tenant Support in Open edX Mobile Apps
    * - Created
      - 2025-03-18
    * - Review Period
-     - TBD
+     - 2026-08-28 - 2026-09-22
    * - References
      -
        * `Multi-tenant PR <https://github.com/zeit-labs/openedx-app-ios-contrib/pull/10>`_
