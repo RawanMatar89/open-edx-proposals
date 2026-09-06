@@ -5,7 +5,7 @@ OEP-68: Multi-Tenant Support in Open edX Mobile Apps
    :widths: 25 75
 
    * - OEP
-     - :ref:`OEP-68 Multi-Tenant Mobile Support`
+     - OEP-68 Multi-Tenant Mobile Support
    * - Title
      - Multi-Tenant Support in Open edX Mobile Apps
    * - Last Modified
@@ -16,7 +16,7 @@ OEP-68: Multi-Tenant Support in Open edX Mobile Apps
        * Ivan Stepanok <ivan.stepanok@raccoongang.com>
 
    * - Arbiter
-     - Marco Morales
+     - TBD
    * - Status
      - Draft
    * - Type
@@ -24,7 +24,7 @@ OEP-68: Multi-Tenant Support in Open edX Mobile Apps
    * - Created
      - 2025-03-18
    * - Review Period
-     - 2026-08-28 - 2026-09-22
+     - TBD
    * - References
      -
        * `Multi-tenant PR <https://github.com/zeit-labs/openedx-app-ios-contrib/pull/10>`_
