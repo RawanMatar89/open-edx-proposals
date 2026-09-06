@@ -48,6 +48,7 @@ and inconsistent user experience. Multi-tenancy enables:
 * Dynamic branding (logo, color scheme, names).
 * Institution-specific API and authentication endpoints.
 * Future extensibility to fetch tenant definitions dynamically.
+* Preserves current behavior for single-tenant deployments — if only one tenant is configured, the app works exactly as it does today, with no selector or added flow.
 
 Current State
 =============
@@ -58,24 +59,21 @@ Current State
 
 Decision
 ********
-Significant portions of this proposal have already been implemented in
-``openedx-app-ios-NEW`` ahead of formal review; the Specification below documents the
-as-built behavior, not just the original design intent.
-
 We propose supporting **multi-tenancy** in one app build by:
 
 * Providing a tenant selector screen at login, and a separate switcher reachable
   post-login from Settings.
 * Sourcing tenant metadata (branding, API URLs, auth URLs, etc.) from a remote JSON
-  endpoint fetched at launch, cached locally, with a bundled YAML config as the offline
-  fallback.
+  endpoint fetched at launch, cached locally.
 * Allowing multiple tenants to hold valid, concurrent sessions on the same device, with
   runtime switching between them that doesn't require reinstallation or re-login for an
   already-signed-in tenant.
 * Isolating tenant data within a single shared persistence store, scoped by tenant key,
   rather than maintaining separate database instances per tenant.
-* Enhancing push notifications with tenant context (not yet implemented — see Push
-  Notifications).
+* Enhancing push notifications with tenant context.
+* Preserving current behavior for single-tenant deployments — if only one tenant is
+  configured, the selector/switcher is skipped and the app works exactly as it does
+  today.
 
 Specification
 *************
@@ -97,16 +95,12 @@ Concurrent Sessions
 - A per-tenant "has a session" indicator (shown in the tenant list/switcher) reflects
   whether that tenant's credentials are currently present, independent of which tenant
   is the *active* one.
-- Switching the active tenant never clears another tenant's session or data — only an
-  explicit logout of a tenant does that, and only for that tenant.
+- Switching the active tenant never clears another tenant's session or data.
 - A per-tenant configuration flag (``is_switch_tenant_login_enabled``) can force login
   even when a session already exists for that tenant, for tenants that want
   re-authentication on every switch regardless of session state.
 - A forced logout (e.g. an expired/invalid token) clears that tenant's session, cached
-  data, and downloaded files. A voluntary logout (Settings) clears the session but
-  currently leaves downloaded course content in place — the original design intent of
-  deleting downloaded content on any logout has been narrowed to the forced-logout path
-  only, pending a product decision on the voluntary-logout case.
+  data. A voluntary logout (Settings) clears the session but currently leaves downloaded course content in place.
 
 Tenant Configuration
 ====================
@@ -119,9 +113,6 @@ app. At launch, the app:
 2. Caches the fetched catalog locally on success.
 3. Falls back to the last successfully cached catalog if the live fetch fails (no
    network, non-2xx response, malformed JSON, timeout).
-4. Falls back to a bundled tenant list in ``config.yaml`` (a ``TENANTS`` block) only if
-   there is no cache either — this is what keeps a fresh install usable offline or when
-   the remote endpoint is unreachable.
 
 Tenant fields (the remote JSON uses lower snake_case; the bundled YAML equivalent uses
 upper snake_case — both are accepted and normalized to the same model):
@@ -166,7 +157,6 @@ Database Management
 - All tenants share a single Core Data/SQLite persistent store; there is no separate database instance or file per tenant, and no ``opendx_{tenant_id}_db``-style naming.
 - Isolation is enforced by scoping every persisted row/key to a ``tenantKey`` — reads, writes, and delete predicates are namespaced rather than routed to a separate store. Keychain and on-disk downloads follow the same tenant-key-namespaced pattern.
 - Switching the active tenant does not reload or rebuild the persistence stack; it changes which ``tenantKey`` subsequent reads/writes are scoped to.
-- Logging out of a tenant clears only that tenant's ``tenantKey``-scoped rows, keys, and downloaded files via a targeted, tenant-scoped deletion — other tenants' cached data in the shared store is left intact, so multiple tenants can hold valid, concurrent sessions at once (see Concurrent Sessions).
 
 Push Notifications
 ==================
@@ -260,7 +250,7 @@ Still open:
 
 * Adopt design tokens for consistent theming across platforms.
 * Add a tenant identifier to push notification payloads, so an incoming push can be routed to the correct tenant and a "switch tenant?" confirmation (with deep-link completion) can be shown on tap — blocked on a backend/payload change.
-* Unregister the push token on a voluntary (Settings) logout, not just a forced one.
+* Unregister the push token.
 * Background sync across all signed-in tenants, and a "manage sessions" view to log out of a tenant that isn't the one currently being viewed.
 * Per-tenant Firebase projects, if a tenant ever needs isolated push/analytics infrastructure instead of the current single shared project.
 
